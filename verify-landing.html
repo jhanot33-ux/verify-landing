@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vérify — Comprendre ce qu'on signe</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #0a0a0a;
+    --white: #f5f3ef;
+    --gold: #c9a84c;
+    --gold-light: #e8d5a0;
+    --muted: #888;
+    --card-bg: #141414;
+    --border: rgba(255,255,255,0.08);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 2rem;
+    background: rgba(10,10,10,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.02em;
+  }
+
+  .logo span { color: var(--gold); }
+
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 400;
+    transition: color 0.2s;
+  }
+
+  nav a:hover { color: var(--white); }
+
+  .nav-links { display: flex; gap: 2rem; align-items: center; }
+
+  .btn-nav {
+    background: var(--gold) !important;
+    color: var(--black) !important;
+    padding: 0.5rem 1.25rem !important;
+    border-radius: 100px !important;
+    font-weight: 500 !important;
+    font-size: 0.85rem !important;
+    transition: opacity 0.2s !important;
+  }
+
+  .btn-nav:hover { opacity: 0.85 !important; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 8rem 2rem 5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.9rem;
+    border: 0.5px solid rgba(201,168,76,0.4);
+    border-radius: 100px;
+    font-size: 0.8rem;
+    color: var(--gold-light);
+    margin-bottom: 2rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 7vw, 6rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+    max-width: 800px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .subtitle {
+    font-size: 1.1rem;
+    color: var(--muted);
+    font-weight: 300;
+    max-width: 480px;
+    margin-bottom: 3rem;
+    line-height: 1.7;
+  }
+
+  .cta-group {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 4rem;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 2rem;
+    background: var(--gold);
+    color: var(--black);
+    font-weight: 500;
+    font-size: 0.95rem;
+    border-radius: 100px;
+    text-decoration: none;
+    transition: opacity 0.2s, transform 0.2s;
+    cursor: pointer;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 2rem;
+    background: transparent;
+    color: var(--white);
+    font-weight: 400;
+    font-size: 0.95rem;
+    border-radius: 100px;
+    text-decoration: none;
+    border: 0.5px solid var(--border);
+    transition: border-color 0.2s, transform 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+  }
+
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.25); transform: translateY(-1px); }
+
+  .hero-visual {
+    width: 100%;
+    max-width: 680px;
+    background: var(--card-bg);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: left;
+    position: relative;
+  }
+
+  .doc-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  .doc-icon {
+    width: 36px; height: 36px;
+    background: rgba(201,168,76,0.1);
+    border: 0.5px solid rgba(201,168,76,0.3);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .doc-title { font-size: 0.9rem; font-weight: 500; }
+  .doc-meta { font-size: 0.75rem; color: var(--muted); }
+
+  .clause-item {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    animation: fadeIn 0.5s ease forwards;
+    opacity: 0;
+  }
+
+  .clause-item:nth-child(1) { animation-delay: 0.3s; }
+  .clause-item:nth-child(2) { animation-delay: 0.6s; }
+  .clause-item:nth-child(3) { animation-delay: 0.9s; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .clause-danger { background: rgba(220,53,53,0.08); border: 0.5px solid rgba(220,53,53,0.2); }
+  .clause-warning { background: rgba(201,168,76,0.08); border: 0.5px solid rgba(201,168,76,0.2); }
+  .clause-ok { background: rgba(34,197,94,0.08); border: 0.5px solid rgba(34,197,94,0.2); }
+
+  .clause-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .dot-danger { background: #dc3535; }
+  .dot-warning { background: var(--gold); }
+  .dot-ok { background: #22c55e; }
+
+  .clause-text { font-size: 0.82rem; line-height: 1.5; }
+  .clause-label { font-weight: 500; margin-bottom: 0.2rem; }
+  .clause-desc { color: var(--muted); }
+
+  /* TRUST BAR */
+  .trust-bar {
+    border-top: 0.5px solid var(--border);
+    border-bottom: 0.5px solid var(--border);
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+    text-align: center;
+  }
+
+  .trust-item { font-size: 0.8rem; color: var(--muted); }
+  .trust-item strong { display: block; font-size: 1.5rem; font-weight: 500; color: var(--white); margin-bottom: 0.1rem; }
+
+  /* SECTIONS */
+  section { padding: 6rem 2rem; max-width: 1100px; margin: 0 auto; }
+
+  .section-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+
+  .section-sub {
+    color: var(--muted);
+    font-size: 1rem;
+    font-weight: 300;
+    max-width: 500px;
+    margin-bottom: 3rem;
+  }
+
+  /* HOW IT WORKS */
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .step {
+    background: var(--black);
+    padding: 2rem 1.75rem;
+    position: relative;
+  }
+
+  .step-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: rgba(201,168,76,0.15);
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .step h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  .step p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* USE CASES */
+  .use-cases {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .use-card {
+    background: var(--card-bg);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: border-color 0.2s;
+  }
+
+  .use-card:hover { border-color: rgba(201,168,76,0.3); }
+
+  .use-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .use-card h3 { font-size: 0.95rem; font-weight: 500; margin-bottom: 0.4rem; }
+  .use-card p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+  /* PRICING */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .price-card {
+    background: var(--card-bg);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    position: relative;
+  }
+
+  .price-card.featured {
+    border-color: rgba(201,168,76,0.5);
+    background: linear-gradient(135deg, rgba(201,168,76,0.05) 0%, var(--card-bg) 100%);
+  }
+
+  .featured-badge {
+    position: absolute;
+    top: -12px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--gold);
+    color: var(--black);
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .price-name { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 1rem; }
+  .price-amount { font-size: 2.5rem; font-weight: 300; margin-bottom: 0.25rem; }
+  .price-amount span { font-size: 1rem; color: var(--muted); }
+  .price-desc { font-size: 0.82rem; color: var(--muted); margin-bottom: 1.5rem; }
+
+  .price-features { list-style: none; margin-bottom: 2rem; }
+  .price-features li {
+    font-size: 0.85rem;
+    padding: 0.4rem 0;
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+  }
+
+  .price-features li::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+  }
+
+  /* CTA SECTION */
+  .cta-section {
+    text-align: center;
+    padding: 6rem 2rem;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .email-form {
+    display: flex;
+    gap: 0.75rem;
+    max-width: 440px;
+    margin: 2.5rem auto 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .email-input {
+    flex: 1;
+    min-width: 220px;
+    padding: 0.85rem 1.25rem;
+    background: var(--card-bg);
+    border: 0.5px solid var(--border);
+    border-radius: 100px;
+    color: var(--white);
+    font-size: 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .email-input::placeholder { color: var(--muted); }
+  .email-input:focus { border-color: rgba(201,168,76,0.5); }
+
+  .form-note { font-size: 0.78rem; color: var(--muted); }
+
+  /* FOOTER */
+  footer {
+    border-top: 0.5px solid var(--border);
+    padding: 2rem;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  footer strong { color: var(--white); font-weight: 500; }
+
+  /* SUCCESS */
+  .success-msg {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    color: #22c55e;
+    font-size: 0.9rem;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    nav { padding: 1rem; }
+    .nav-links { gap: 1rem; }
+    .trust-bar { gap: 1.5rem; }
+    section { padding: 4rem 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Véri<span>fy</span></div>
+  <div class="nav-links">
+    <a href="#how">Comment ça marche</a>
+    <a href="#pricing">Tarifs</a>
+    <a href="#waitlist" class="btn-nav">Accès anticipé</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge">
+    <div class="badge-dot"></div>
+    Propulsé par l'IA · Bêta privée bientôt
+  </div>
+  <h1>Comprendre<br><em>ce qu'on signe.</em></h1>
+  <p class="subtitle">
+    Uploadez n'importe quel contrat. Notre IA l'analyse en secondes, détecte les clauses problématiques et vous l'explique en langage clair.
+  </p>
+  <div class="cta-group">
+    <a href="#waitlist" class="btn-primary">Rejoindre la liste d'attente →</a>
+    <a href="#how" class="btn-secondary">Voir comment ça marche</a>
+  </div>
+
+  <!-- Demo Visual -->
+  <div class="hero-visual">
+    <div class="doc-header">
+      <div class="doc-icon">📄</div>
+      <div>
+        <div class="doc-title">Contrat_de_mission_freelance.pdf</div>
+        <div class="doc-meta">Analyse en cours — 3 points détectés</div>
+      </div>
+    </div>
+    <div class="clause-item clause-danger">
+      <div class="clause-dot dot-danger"></div>
+      <div class="clause-text">
+        <div class="clause-label">⚠ Clause abusive — Propriété intellectuelle</div>
+        <div class="clause-desc">Le client s'attribue tous vos droits d'auteur, y compris les travaux futurs non liés à la mission.</div>
+      </div>
+    </div>
+    <div class="clause-item clause-warning">
+      <div class="clause-dot dot-warning"></div>
+      <div class="clause-text">
+        <div class="clause-label">À surveiller — Délais de paiement</div>
+        <div class="clause-desc">Paiement à 60 jours net. Légal, mais négociable — la norme en freelance est 30 jours.</div>
+      </div>
+    </div>
+    <div class="clause-item clause-ok">
+      <div class="clause-dot dot-ok"></div>
+      <div class="clause-text">
+        <div class="clause-label">✓ Conforme — Clause de confidentialité</div>
+        <div class="clause-desc">La NDA est standard et limitée dans le temps (2 ans). Aucun problème.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-item"><strong>2 min</strong>Temps d'analyse moyen</div>
+  <div class="trust-item"><strong>RGPD</strong>Vos données protégées</div>
+  <div class="trust-item"><strong>100%</strong>Langage humain</div>
+  <div class="trust-item"><strong>Gratuit</strong>Pour commencer</div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-label">Comment ça marche</div>
+  <h2>Simple comme<br>bonjour.</h2>
+  <p class="section-sub">Pas de jargon juridique, pas de formation requise. En trois étapes.</p>
+
+  <div class="steps-grid">
+    <div class="step">
+      <div class="step-num">01</div>
+      <h3>Uploadez votre document</h3>
+      <p>PDF, Word, image scannée — on accepte tout. Bail, contrat de mission, CGV, tout y passe.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <h3>L'IA analyse en temps réel</h3>
+      <p>Notre modèle formé sur le droit français parcourt chaque clause et identifie les points à risque.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <h3>Recevez votre rapport</h3>
+      <p>Un résumé clair, des clauses surlignées, et des recommandations concrètes. Pas de blabla.</p>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<section>
+  <div class="section-label">Pour qui ?</div>
+  <h2>Tout le monde signe<br>des contrats.</h2>
+  <p class="section-sub">Vérify est fait pour ceux qui n'ont pas d'avocat sous la main — c'est-à-dire tout le monde.</p>
+
+  <div class="use-cases">
+    <div class="use-card">
+      <span class="use-icon">💼</span>
+      <h3>Freelances</h3>
+      <p>Contrats de mission, devis, NDA — protégez vos droits avant de signer.</p>
+    </div>
+    <div class="use-card">
+      <span class="use-icon">🏠</span>
+      <h3>Locataires</h3>
+      <p>Bail, état des lieux, règlement de copropriété — comprendre avant de vous engager.</p>
+    </div>
+    <div class="use-card">
+      <span class="use-icon">🛍️</span>
+      <h3>Consommateurs</h3>
+      <p>CGV, abonnements, garanties — savoir ce que vous acceptez vraiment.</p>
+    </div>
+    <div class="use-card">
+      <span class="use-icon">🏢</span>
+      <h3>TPE / Auto-entrepreneurs</h3>
+      <p>Contrats fournisseurs, partenariats, accords commerciaux — sécurisez votre activité.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="section-label">Tarifs</div>
+  <h2>Commencez<br>gratuitement.</h2>
+  <p class="section-sub">Pas de carte bleue requise pour démarrer. Passez au pro quand vous en avez besoin.</p>
+
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-name">Gratuit</div>
+      <div class="price-amount">0€ <span>/ mois</span></div>
+      <div class="price-desc">Pour découvrir Vérify sans engagement.</div>
+      <ul class="price-features">
+        <li>3 analyses par mois</li>
+        <li>Résumé des points clés</li>
+        <li>Détection des clauses abusives</li>
+        <li>Documents jusqu'à 10 pages</li>
+      </ul>
+      <a href="#waitlist" class="btn-secondary" style="display:block; text-align:center;">Commencer gratuitement</a>
+    </div>
+
+    <div class="price-card featured">
+      <div class="featured-badge">Le plus populaire</div>
+      <div class="price-name">Pro</div>
+      <div class="price-amount">9€ <span>/ mois</span></div>
+      <div class="price-desc">Pour les freelances et indépendants.</div>
+      <ul class="price-features">
+        <li>Analyses illimitées</li>
+        <li>Rapport détaillé clause par clause</li>
+        <li>Suggestions de reformulation</li>
+        <li>Documents jusqu'à 100 pages</li>
+        <li>Historique & exports PDF</li>
+      </ul>
+      <a href="#waitlist" class="btn-primary" style="display:block; text-align:center;">Accès anticipé — 50% off</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA WAITLIST -->
+<div class="cta-section" id="waitlist">
+  <div class="section-label">Accès anticipé</div>
+  <h2>Soyez parmi<br>les premiers.</h2>
+  <p class="section-sub" style="margin: 0 auto 0;">Rejoignez la liste d'attente et obtenez 3 mois Pro offerts au lancement.</p>
+
+  <div class="email-form">
+    <input type="email" class="email-input" placeholder="votre@email.com" id="email-input">
+    <button class="btn-primary" onclick="handleSubmit()">Rejoindre →</button>
+  </div>
+
+  <div class="success-msg" id="success-msg">
+    ✓ Vous êtes sur la liste ! On vous prévient dès le lancement.
+  </div>
+
+  <div class="form-note">Aucun spam. Désabonnement en un clic.</div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <strong>Vérify</strong> — Comprendre ce qu'on signe.<br>
+  <span style="margin-top:0.5rem; display:block;">© 2026 · Nouvelle-Aquitaine, France · contact@verify.fr</span>
+</footer>
+
+<script>
+function handleSubmit() {
+  const email = document.getElementById('email-input').value;
+  if (!email || !email.includes('@')) {
+    document.getElementById('email-input').style.borderColor = 'rgba(220,53,53,0.5)';
+    return;
+  }
+  document.querySelector('.email-form').style.display = 'none';
+  const msg = document.getElementById('success-msg');
+  msg.style.display = 'flex';
+}
+
+document.getElementById('email-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') handleSubmit();
+  this.style.borderColor = '';
+});
+</script>
+
+</body>
+</html>
